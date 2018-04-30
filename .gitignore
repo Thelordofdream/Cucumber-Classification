@@ -2,3 +2,6 @@
 .idea/
 cucumber-9-p2-python/
 cucumber-9-python/
+__pycache__/
+train.tfrecord
+model.py

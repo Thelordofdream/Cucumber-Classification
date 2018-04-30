@@ -8,6 +8,7 @@ Here, we use a cucumber image data set from Japan, which contains 9 classes of c
 
 The details of CUCUMBER-9 is the following:
 
+* There 5
 * Each cucumber contains three images, including above, below and side
 * The size of cucumber image is 32 x 32
 * Each image have three channels (RGB)
