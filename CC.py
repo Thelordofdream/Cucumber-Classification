@@ -12,23 +12,23 @@ def train(model, batch_x, batch_y, sess, training_iters=100, display_step=10):
         sess.run(model.optimizer, feed_dict={model.x: batch_xs, model.y: batch_ys})
         if step % display_step == 0:
             summary, loss, acc = sess.run([model.merged, model.loss, model.accuracy], feed_dict={model.x: batch_xs, model.y: batch_ys})
-            label, logits = sess.run([model.output, model.y], feed_dict={model.x: batch_xs, model.y: batch_ys})
-            print(label, logits)
+            logits, labels = sess.run([model.output, model.y], feed_dict={model.x: batch_xs, model.y: batch_ys})
+            print(logits, labels)
             train_writer.add_summary(summary, step)
-            print("Iter " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc))
+            tf.logging.info("Iter " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc))
         step += 1
-    print("Optimization Finished!")
+    tf.logging.info("Optimization Finished!")
 
 
 def test(model, x_test, y_test, sess):
     test_data, test_label = sess.run([x_test, y_test])
     loss, acc = sess.run([ model.loss, model.accuracy], feed_dict={model.x: test_data, model.y: test_label})
-    print("Test Loss= " + "{:.6f}".format(loss) + ", Test Accuracy= " + "{:.5f}".format(acc))
+    tf.logging.info("Test Loss= " + "{:.6f}".format(loss) + ", Test Accuracy= " + "{:.5f}".format(acc))
 
 def save(sess):
     saver = tf.train.Saver()
     save_path = saver.save(sess, "./model/model.ckpt")
-    print("Model saved in file: %s" % save_path)
+    tf.logging.info("Model saved in file: %s" % save_path)
 
 
 if __name__ == "__main__":
@@ -41,8 +41,11 @@ if __name__ == "__main__":
     my_network.create_nerual_network()
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
-        threads = tf.train.start_queue_runners(sess=sess)
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         sess.run(init)
         train(my_network, x_batch, y_batch, sess)
         test(my_network, x_test, y_test, sess)
+        coord.request_stop()
+        coord.join(threads)
         save(sess)

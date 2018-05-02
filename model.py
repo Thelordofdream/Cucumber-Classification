@@ -1,3 +1,4 @@
+# coding=utf-8
 import tensorflow as tf
 import numpy as np
 from tensorflow.python.training import moving_averages
@@ -16,6 +17,7 @@ class CNN(object):
         self.use_bottleneck = use_bottleneck
         self.num_residual_units = residual_units
         self.mode = 'train'
+        self.global_step = tf.train.get_or_create_global_step()
 
         self._extra_train_ops = []
         self.output = None
@@ -72,30 +74,44 @@ class CNN(object):
 
         # 全局池化层
         with tf.variable_scope('unit_last'):
-            x = self._batch_norm('unit_last', x)
+            x = self._batch_norm('final_bn', x)
             x = self._relu(x, self.relu_leakiness)
-            # x = self._global_avg_pool(x)
+            x = self._global_avg_pool(x)
 
         # 全连接层 + Softmax
         with tf.variable_scope('logit'):
             logits = self._fully_connected(x, self.classes)
             self.output = tf.nn.softmax(logits)
 
-
-
         # 构建损失函数
-        with tf.variable_scope('loss'):
+        with tf.variable_scope('costs'):
+            # 交叉熵
             self.y = tf.placeholder("float", [self.batch_size, self.classes], name="y")
+            xent = tf.nn.softmax_cross_entropy_with_logits(
+                logits=logits, labels=self.y)
             # 加和
-            cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
-                logits=logits, labels=self.y), name="cross_entropy")
-            # # L2正则，权重衰减
-            self.loss = cross_entropy # + self._decay()
+            cross_entropy= tf.reduce_mean(xent, name='xent')
+            # L2正则，权重衰减
+            self.loss = cross_entropy + self._decay()
             # 添加cost总结，用于Tensorborad显示
         tf.summary.scalar('loss', self.loss)
 
         with tf.name_scope('optimizer'):
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+            # 计算训练参数的梯度
+            trainable_variables = tf.trainable_variables()
+            grads = tf.gradients(self.loss, trainable_variables)
+
+            optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+
+            # 梯度优化操作
+            apply_op = optimizer.apply_gradients(
+                zip(grads, trainable_variables),
+                global_step=self.global_step,
+                name='train_step')
+            # 合并BN更新操作
+            train_ops = [apply_op] + self._extra_train_ops
+            self.optimizer = tf.group(*train_ops)
+            # 建立优化操作组
             correct_pred = tf.equal(tf.argmax(self.output, axis=1), tf.argmax(self.y, axis=1))
             self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
         tf.summary.scalar('accuracy', self.accuracy)
@@ -291,7 +307,6 @@ class CNN(object):
     # leaky ReLU激活函数，泄漏参数leakiness为0就是标准ReLU
     def _relu(self, x, leakiness=0.0):
         return tf.where(tf.less(x, 0.0), leakiness * x, x, name='leaky_relu')
-
 
     # 全连接层，网络最后一层
     def _fully_connected(self, x, out_dim):
