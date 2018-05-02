@@ -5,7 +5,7 @@ from tensorflow.python.training import moving_averages
 
 
 class CNN(object):
-    def __init__(self, name="X", depth=9, input_size=32, batch_size=200, classes=10, residual_units=5, learning_rate=0.01, decay_rate=0.0002, relu_leakiness=0.1, use_bottleneck=True):
+    def __init__(self, name="X", depth=9, input_size=32, batch_size=200, classes=10, residual_units=7, learning_rate=0.01, decay_rate=0.0002, relu_leakiness=0.1, use_bottleneck=True):
         self.name = name
         self.depth = depth
         self.input_size = input_size
@@ -339,7 +339,7 @@ class data(CNN):
                                                'label': tf.FixedLenFeature([1], tf.int64),
                                                'image': tf.FixedLenFeature([], tf.string),
                                            })
-        self.images = tf.decode_raw(features['image'], tf.float32)
+        self.images = tf.decode_raw(features['image'], tf.int32)
         self.images = tf.reshape(self.images, [self.depth, self.input_size, self.input_size])
         self.images = tf.transpose(self.images, [1, 2, 0])
         self.label = tf.cast(features['label'], tf.int32)
