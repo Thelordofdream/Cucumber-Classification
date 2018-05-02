@@ -74,7 +74,7 @@ class CNN(object):
         with tf.variable_scope('unit_last'):
             x = self._batch_norm('unit_last', x)
             x = self._relu(x, self.relu_leakiness)
-            x = self._global_avg_pool(x)
+            # x = self._global_avg_pool(x)
 
         # 全连接层 + Softmax
         with tf.variable_scope('logit'):
@@ -299,7 +299,7 @@ class CNN(object):
         x = tf.reshape(x, [self.batch_size, -1])
         # 参数w，平均随机初始化，[-sqrt(3/dim), sqrt(3/dim)]*factor
         w = tf.get_variable('DW', [x.get_shape()[1], out_dim],
-                            initializer=tf.initializers.variance_scaling(distribution='uniform'))
+                            initializer=tf.uniform_unit_scaling_initializer(factor=1.0))
         # 参数b，0值初始化
         b = tf.get_variable('biases', [out_dim], initializer=tf.constant_initializer())
         # 计算x*w+b

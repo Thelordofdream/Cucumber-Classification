@@ -22,16 +22,8 @@ def train(model, batch_x, batch_y, sess, training_iters=100, display_step=10):
 
 def test(model, x_test, y_test, sess):
     test_data, test_label = sess.run([x_test, y_test])
-    test = sess.run(model.output, feed_dict={model.x: test_data, model.y: test_label})
-    error_sum = 0
-    for i in range(model.batch_size):
-        error_sum += abs(test[i] - test_label[i]) * 20000
-        # print test[i] * 20000, test_label[i] * 20000
-    print(error_sum / model.batch_size)
-    # plt.plot(test_label * 20000, 'b-')
-    # plt.plot(test * 20000, 'r-')
-    # plt.legend(loc='best')
-    # plt.show()
+    loss, acc = sess.run([ model.loss, model.accuracy], feed_dict={model.x: test_data, model.y: test_label})
+    print("Test Loss= " + "{:.6f}".format(loss) + ", Test Accuracy= " + "{:.5f}".format(acc))
 
 def save(sess):
     saver = tf.train.Saver()
