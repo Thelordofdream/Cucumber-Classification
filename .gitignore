@@ -6,3 +6,4 @@ __pycache__/
 train.tfrecord
 /test.tfrecord
 /train/
+/model/

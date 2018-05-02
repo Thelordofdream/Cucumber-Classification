@@ -28,12 +28,12 @@ class CNN(object):
     def create_nerual_network(self):
         with tf.variable_scope('init'):
             self.x = tf.placeholder("float", [self.batch_size, self.input_size, self.input_size, self.depth], name="x")
-            """第一层卷积（9,3x3/1,16）"""
+            # Convolution Layer 1（9,3x3/1,16）
             x = self._conv('init_conv', self.x, 3, 9, 16, self._stride_arr(1))
 
-        # 残差网络参数
+        # Strides for 3 Renset units
         strides = [1, 2, 2]
-        # 激活前置
+        # Switch of activation for 3 Resnet units
         activate_before_residual = [True, False, False]
         if self.use_bottleneck:
             # bottleneck残差单元模块
