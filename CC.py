@@ -3,16 +3,17 @@ import model
 import matplotlib.pyplot as plt
 
 
-def train(model, batch_x, batch_y, sess, training_iters=10000, display_step=1000):
+def train(model, batch_x, batch_y, sess, training_iters=100, display_step=10):
     train_writer = tf.summary.FileWriter('./train', sess.graph)
     sess.run(init)
     step = 1
     while step <= training_iters:
-        batch_xs, batch_ys = sess.run[batch_x, batch_y]
-        batch_xs = batch_xs.reshape((model.batch_size, model.steps, model.inputs))
+        batch_xs, batch_ys = sess.run([batch_x, batch_y])
         sess.run(model.optimizer, feed_dict={model.x: batch_xs, model.y: batch_ys})
         if step % display_step == 0:
-            summary, loss, acc = sess.run([model.merged, model.cost, model.accuracy], feed_dict={model.x: batch_xs, model.y: batch_ys})
+            summary, loss, acc = sess.run([model.merged, model.loss, model.accuracy], feed_dict={model.x: batch_xs, model.y: batch_ys})
+            label, logits = sess.run([model.output, model.y], feed_dict={model.x: batch_xs, model.y: batch_ys})
+            print(label, logits)
             train_writer.add_summary(summary, step)
             print("Iter " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc))
         step += 1
@@ -45,6 +46,7 @@ if __name__ == "__main__":
     x_batch, y_batch = train_data.get_batches()
     x_test, y_test = test_data.get_batches()
     my_network = model.CNN(name="CC", learning_rate=0.001)
+    my_network.create_nerual_network()
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
         threads = tf.train.start_queue_runners(sess=sess)
