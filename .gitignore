@@ -3,7 +3,10 @@
 cucumber-9-p2-python/
 cucumber-9-python/
 __pycache__/
-train.tfrecord
-/test.tfrecord
-/train/
-/model/
+model_v1/
+model_v2/
+train_v1/
+train_v2/
+cc_v2/
+cc_v1/
+
