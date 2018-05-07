@@ -39,7 +39,7 @@ def save(sess):
 
 
 if __name__ == "__main__":
-    my_network = model.CNN(name="CC_v1", learning_rate=0.01, depth=3, classes=9)
+    my_network = model.CNN(name="CC_v1", learning_rate=0.001, depth=3, classes=9)
 
     my_network.create_nerual_network()
 

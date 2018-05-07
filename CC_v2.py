@@ -39,7 +39,7 @@ def save(sess):
 
 
 if __name__ == "__main__":
-    my_network = model.CNN(name="CC_1", learning_rate=0.01, depth=9, classes=10)
+    my_network = model.CNN(name="CC_1", learning_rate=0.001, depth=9, classes=10)
     my_network.create_nerual_network()
 
     x_batch, y_batch = my_network.load_data_source(filename="./cc_v2/train.tfrecord")
