@@ -36,7 +36,7 @@ class CNN(object):
     def create_nerual_network(self):
         with tf.variable_scope('init'):
             self.x = tf.placeholder("float", [self.batch_size, self.input_size, self.input_size, self.depth], name="x")
-            # Convolution Layer 1（9,3x3/1,16）
+            # Convolution Layer 1 (9,3x3/1,16)
             x = self._conv('init_conv', self.x, 3, self.depth, 16, self._stride_arr(1))
 
         # Strides for 3 ResNet units
@@ -140,7 +140,7 @@ class CNN(object):
 
         # First sub-layer
         with tf.variable_scope('sub1'):
-            # 3x3 convolution，channels fit: in_filter -> out_filter
+            # 3x3 convolution, channels fit: in_filter -> out_filter
             x = self._conv('conv1', x, 3, in_filter, out_filter, stride)
 
         # Second sub-layer
@@ -148,7 +148,7 @@ class CNN(object):
             # batch normalization and ReLU activation
             x = self._batch_norm('bn2', x)
             x = self._relu(x, self.relu_leakiness)
-            # 3x3 convolution，1 stride，channels don't change: out_filter
+            # 3x3 convolution, 1 stride,channels don't change: out_filter
             x = self._conv('conv2', x, 3, out_filter, out_filter, [1, 1, 1, 1])
 
         # merge residual layer
@@ -191,7 +191,7 @@ class CNN(object):
 
         # First sub-layer
         with tf.variable_scope('sub1'):
-            # 1x1 convolution，channels fit: in_filter -> out_filter/4
+            # 1x1 convolution, channels fit: in_filter -> out_filter/4
             x = self._conv('conv1', x, 1, in_filter, out_filter / 4, stride)
 
         # Second sub-layer
@@ -199,7 +199,7 @@ class CNN(object):
             # batch normalization and ReLU activation
             x = self._batch_norm('bn2', x)
             x = self._relu(x, self.relu_leakiness)
-            # 3x3 convolution，1 stride ，channels don't change: out_filter/4
+            # 3x3 convolution, 1 stride, channels don't change: out_filter/4
             x = self._conv('conv2', x, 3, out_filter / 4, out_filter / 4, [1, 1, 1, 1])
 
         # Third sub-layer
@@ -207,14 +207,14 @@ class CNN(object):
             # batch normalization and ReLU activation
             x = self._batch_norm('bn3', x)
             x = self._relu(x, self.relu_leakiness)
-            # 1x1 convolution，1 stride， channels don't change: out_filter/4 -> out_filter
+            # 1x1 convolution, 1 stride, channels don't change: out_filter/4 -> out_filter
             x = self._conv('conv3', x, 1, out_filter / 4, out_filter, [1, 1, 1, 1])
 
         # merge residual layer
         with tf.variable_scope('sub_add'):
             # when channels change
             if in_filter != out_filter:
-                # 1x1 convolution，channels fit: in_filter -> out_filter
+                # 1x1 convolution, channels fit: in_filter -> out_filter
                 orig_x = self._conv('project', orig_x, 1, in_filter, out_filter, stride)
 
             # merge identity and layer output
@@ -273,7 +273,7 @@ class CNN(object):
                 tf.summary.histogram(mean.op.name, mean)
                 tf.summary.histogram(variance.op.name, variance)
 
-            # batch normalization layer：((x-mean)/var)*gamma+beta
+            # batch normalization layer: ((x-mean)/var)*gamma+beta
             y = tf.nn.batch_normalization(x, mean, variance, beta, gamma, 0.001)
             y.set_shape(x.get_shape())
             return y
@@ -307,12 +307,12 @@ class CNN(object):
 
     # fully connection layer
     def _fully_connected(self, x, out_dim):
-        # shape the input to 2D tensor，size = [N,-1]
+        # shape the input to 2D tensor, size = [N,-1]
         x = tf.reshape(x, [self.batch_size, -1])
-        # define w，use random uniform initializer，[-sqrt(3/dim), sqrt(3/dim)]*factor
+        # define w, use random uniform initializer, [-sqrt(3/dim), sqrt(3/dim)] * factor
         w = tf.get_variable('DW', [x.get_shape()[1], out_dim],
                             initializer=tf.initializers.variance_scaling(distribution="uniform"))
-        # define b，use zero initializer
+        # define b, use zero initializer
         b = tf.get_variable('biases', [out_dim], initializer=tf.zeros_initializer())
         # compute x*w+b
         return tf.nn.xw_plus_b(x, w, b)

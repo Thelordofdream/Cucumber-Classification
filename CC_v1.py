@@ -1,21 +1,27 @@
 import tensorflow as tf
+import numpy as np
 import model
 
-def train(model, batch_x, batch_y, x_test, y_test, sess, training_iters=1000, test_step=10):
+
+def train(model, batch_x, batch_y, x_test, y_test, sess, training_iters=5000, test_step=10):
     train_writer = tf.summary.FileWriter('./train_v1', sess.graph)
-    sess.run(init)
+    generation_error = []
     step = 1
     while step <= training_iters:
         batch_xs, batch_ys = sess.run([batch_x, batch_y])
         sess.run(model.optimizer, feed_dict={model.x: batch_xs, model.y: batch_ys})
         if step % test_step == 0:
-            summary, loss, acc = sess.run([model.merged, model.loss, model.accuracy], feed_dict={model.x: batch_xs, model.y: batch_ys})
+            summary, loss, acc = sess.run([model.merged, model.loss, model.accuracy],
+                                          feed_dict={model.x: batch_xs, model.y: batch_ys})
             train_writer.add_summary(summary, step)
-            print("Iter " + str(step) + ":\nTrain Loss = " + "{:.6f}".format(loss) + ", Train Accuracy = " + "{:.5f}".format(acc))
+            print("Iter " + str(step) + ":\nTrain Loss = " + "{:.6f}".format(
+                loss) + ", Train Accuracy = " + "{:.5f}".format(acc))
             test_loss = test(model, x_test, y_test, sess)
             print("Gen Error = " + "{:.6f}".format(test_loss - loss))
+            generation_error.append(test_loss - loss)
         step += 1
     print("Optimization Finished!")
+    np.save('generation_v1.npy', np.array(generation_error))
     train_writer.close()
 
 
@@ -33,7 +39,7 @@ def save(sess):
 
 
 if __name__ == "__main__":
-    my_network = model.CNN(name="CC_v1", learning_rate=0.001, depth=3, classes=9)
+    my_network = model.CNN(name="CC_v1", learning_rate=0.01, depth=3, classes=9)
 
     my_network.create_nerual_network()
 
