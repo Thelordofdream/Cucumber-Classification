@@ -21,11 +21,14 @@ class CNN(object):
         self.mode = 'train'
         self.global_step = tf.train.get_or_create_global_step()
 
+        self.images = None
+        self.label = None
+
         self.x = None
         self.y = None
-        self._extra_train_ops = []
         self.output = None
         self.loss = None
+        self._extra_train_ops = []
         self.optimizer = None
         self.accuracy = None
         self.merged = None
@@ -107,8 +110,8 @@ class CNN(object):
             self.optimizer = tf.group(*train_ops)
 
             # compute accuracy
-            correct_pred = tf.equal(tf.argmax(self.output, axis=1), tf.argmax(self.y, axis=1))
-            self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+            correct_prediction = tf.equal(tf.argmax(self.output, axis=1), tf.argmax(self.y, axis=1))
+            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         tf.summary.scalar('accuracy', self.accuracy)
 
         self.merged = tf.summary.merge_all()
@@ -238,7 +241,7 @@ class CNN(object):
                                     initializer=tf.constant_initializer(1.0, tf.float32))
 
             if self.mode == 'train':
-                # comput mean and standard deviation on each channel
+                # compute mean and standard deviation on each channel
                 mean, variance = tf.nn.moments(x, [0, 1, 2], name='moments')
                 # create variables for batch mean and standard deviation
                 moving_mean = tf.get_variable('moving_mean',

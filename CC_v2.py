@@ -1,6 +1,5 @@
 import tensorflow as tf
 import model
-import matplotlib.pyplot as plt
 
 
 def train(model, batch_x, batch_y, x_test, y_test, sess, training_iters=1000, test_step=10):
