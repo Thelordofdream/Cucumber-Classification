@@ -9,4 +9,6 @@ train_v1/
 train_v2/
 cc_v2/
 cc_v1/
-
+generation_v1.npy
+generation_v2.npy
+generation_v3.npy
